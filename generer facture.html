@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            max-width: 100px;
+            flex: 1 1 auto;
+        }
+        .company-details {
+            text-align: right;
+            flex: 2 1 auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .invoice {
+            display: none;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .invoice-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .invoice-header img {
+            max-width: 100px;
+            flex: 1 1 auto;
+        }
+        .invoice-header .company-details {
+            text-align: right;
+            flex: 2 1 auto;
+        }
+        .invoice .details {
+            margin-bottom: 20px;
+        }
+        .invoice .details p {
+            margin: 5px 0;
+        }
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .invoice-table th, .invoice-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .invoice-table th {
+            background-color: #f2f2f2;
+        }
+        .invoice-summary {
+            text-align: right;
+        }
+        .invoice-summary .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .invoice-summary .summary-item span {
+            width: 150px;
+        }
+        .invoice-summary .summary-item span:last-child {
+            text-align: right;
+        }
+        @media (max-width: 600px) {
+            .header, .invoice-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .company-details {
+                text-align: center;
+            }
+        }
+        @media print {
+            body > *:not(.invoice) {
+                display: none;
+            }
+            .invoice {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://www.azrar-sanitaire.com/doc/Asset4.png" alt="Logo">
+            <div class="company-details">
+                <h1>Sanitaire Azrar Cerame</h1>
+                <p>Route principale n 2 Imzouren Al Hoceima,</p>
+                <p>Douar Imzouarèn, Morocco</p>
+                <p>Telephone: 0653-321116</p>
+                <p>Email: zakariaazrar10@gmail.com</p>
+            </div>
+        </div>
+        <form id="invoice-form">
+            <div class="form-group">
+                <label for="name">Nom de client:</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="date">Date:</label>
+                <input type="date" id="date" required>
+            </div>
+            <div id="product-container">
+                <div class="form-group product-group">
+                    <label for="product">Nom de Produit:</label>
+                    <input type="text" class="product-name" required>
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" class="product-quantity" required>
+                    <label for="price">Prix par Metre:</label>
+                    <input type="number" class="product-price" step="0.01" required>
+                </div>
+            </div>
+            <button type="button" class="btn" onclick="addProduct()">Ajouter produit</button>
+            <button type="button" class="btn" onclick="generateInvoice()">Générer la facture</button>
+            <button type="button" class="btn" onclick="printInvoice()">Imprimer</button>
+        </form>
+    </div>
+
+    <div class="invoice" id="invoice">
+        <div class="invoice-header">
+            <img src="https://www.azrar-sanitaire.com/doc/Asset4.png" alt="Logo">
+            <div class="company-details">
+                <h1>Sanitaire Azrar Cerame</h1>
+                <p>Route principale n 2 Imzouren Al Hoceima,</p>
+                <p>Douar Imzouarèn, Morocco</p>
+                <p>Telephone: 0653-321116</p>
+                <p>Email: zakariaazrar10@gmail.com</p>
+            </div>
+        </div>
+        <div class="details">
+            <p>Nom de client: <span id="inv-name"></span></p>
+            <p>Date: <span id="inv-date"></span></p>
+        </div>
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>Nom de Produit</th>
+                    <th>Quantity</th>
+                    <th>Prix par Metre</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="invoice-items"></tbody>
+        </table>
+        <div class="invoice-summary">
+            <div class="summary-item">
+                <span><strong>Subtotal:</strong></span>
+                <span id="inv-subtotal"></span>
+            </div>
+            <div class="summary-item">
+                <span><strong>Total:</strong></span>
+                <span id="inv-total"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addProduct() {
+            const productContainer = document.getElementById('product-container');
+            const productGroup = document.createElement('div');
+            productGroup.className = 'form-group product-group';
+            productGroup.innerHTML = `
+                <label for="product">Nom de Produit:</label>
+                <input type="text" class="product-name" required>
+                <label for="quantity">Quantity:</label>
+                <input type="number" class="product-quantity" required>
+                <label for="price">Prix par Metre:</label>
+                <input type="number" class="product-price" step="0.01" required>
+            `;
+            productContainer.appendChild(productGroup);
+        }
+
+        function generateInvoice() {
+            const name = document.getElementById('name').value;
+            const date = document.getElementById('date').value;
+
+            document.getElementById('inv-name').textContent = name;
+            document.getElementById('inv-date').textContent = date;
+
+            const productGroups = document.getElementsByClassName('product-group');
+            const invoiceItems = document.getElementById('invoice-items');
+            invoiceItems.innerHTML = '';
+            let subtotal = 0;
+
+            Array.from(productGroups).forEach(group => {
+                const productName = group.querySelector('.product-name').value;
+                const productQuantity = parseFloat(group.querySelector('.product-quantity').value);
+                const productPrice = parseFloat(group.querySelector('.product-price').value);
+                const productTotal = productQuantity * productPrice;
+                subtotal += productTotal;
+
+                const itemRow = document.createElement('tr');
+                itemRow.innerHTML = `
+                    <td>${productName}</td>
+                    <td>${productQuantity}</td>
+                    <td>${productPrice.toFixed(2)}</td>
+                    <td>${productTotal.toFixed(2)}</td>
+                `;
+                invoiceItems.appendChild(itemRow);
+            });
+
+            document.getElementById('inv-subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('inv-total').textContent = subtotal.toFixed(2);
+            document.getElementById('invoice').style.display = 'block';
+        }
+
+        function printInvoice() {
+            generateInvoice();
+            window.print();
+        }
+    </script>
+</body>
+</html>
